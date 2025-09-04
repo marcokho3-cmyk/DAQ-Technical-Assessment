@@ -7,8 +7,8 @@ const TCP_PORT = 12000; // emulator connects here
 const WS_PORT = 8080;   // frontend connects here
 
 // Safe range
-const SAFE_MIN = 20;
-const SAFE_MAX = 80;
+const SAFE_MIN = 35;
+const SAFE_MAX = 36;
 
 // --- WebSocket server for frontends ---
 const websocketServer = new WebSocketServer({ port: WS_PORT });
@@ -100,38 +100,24 @@ tcpServer.on("connection", (socket) => {
   setSourceStatus(true);
   console.log("[tcp] Client connected (emulator). Active:", tcpConnections);
 
-  let buf = "";
-  let lastLog = 0;
-  let rxCount = 0;
+  let buf = ""; // per-connection buffer
 
   socket.on("data", (chunk) => {
-    // Accumulate and normalize: ensure there's a newline between back-to-back JSON objects
     buf += chunk.toString("utf8");
-    buf = buf.replace(/}\s*{/g, '}\n{');
-
     const lines = buf.split("\n");
-    buf = lines.pop() ?? "";
+    buf = lines.pop() ?? ""; // keep incomplete line for next chunk
 
     for (const raw of lines) {
       const line = raw.trim();
       if (!line) continue;
-
-      // --- try to parse a single JSON object ---
-      const sample = parseLine(line);          // <-- your existing validator
+      const sample = parseLine(line);
       if (!sample) continue;
 
-      rxCount++;
+      // Range logic
+      handleRange(sample.battery_temperature, sample.timestamp);
 
-      // throttled debug: once per second
-      const now = Date.now();
-      if (now - lastLog > 1000) {
-        console.log(`[rx] ${rxCount} samples/s, latest=${sample.battery_temperature.toFixed(3)}°C`);
-        rxCount = 0;
-        lastLog = now;
-      }
-
-      handleRange(sample.battery_temperature, sample.timestamp); // alerts
-      broadcast({                                              // forward clean payload
+      // Forward only clean data, in a consistent shape
+      broadcast({
         type: "data",
         battery_temperature: sample.battery_temperature,
         timestamp: sample.timestamp,
@@ -149,7 +135,6 @@ tcpServer.on("connection", (socket) => {
     console.error("[tcp] Client error:", err.message);
   });
 });
-
 
 tcpServer.listen(TCP_PORT, () => {
   console.log(`[tcp] TCP server listening on ${TCP_PORT}`);

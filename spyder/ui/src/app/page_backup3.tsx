@@ -12,7 +12,6 @@ import RedbackLogoDarkMode from "../../public/logo-darkmode.svg"
 import RedbackLogoLightMode from "../../public/logo-lightmode.svg"
 import { LineChart, Line, Tooltip, XAxis, YAxis, CartesianGrid, ReferenceArea } from "recharts"
 
-
 const WS_URL = "ws://localhost:8080"
 
 interface VehicleData {

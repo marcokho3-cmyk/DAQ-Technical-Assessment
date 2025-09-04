@@ -18,10 +18,17 @@ function Numeric({ temp }: TemperatureProps) {
   // Justify your choice of implementation in brainstorming.md
 
   return (
-    <div className="text-foreground text-4xl font-bold">
-      {`${temp}°C`}
-    </div>
-  );
+  <div className={`text-6xl font-semibold ${
+    temp < 20 || temp > 80
+      ? "text-temp-unsafe"
+      : (temp >= 20 && temp < 25) || (temp > 75 && temp <= 80)
+      ? "text-temp-warn"
+      : "text-temp-safe"
+  }`}>
+    {Number.isFinite(temp) ? temp.toFixed(3) : "—"}°C
+  </div>
+);
+
 }
 
 export default Numeric;
