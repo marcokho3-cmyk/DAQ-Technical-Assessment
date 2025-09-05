@@ -15,6 +15,5 @@ services:
         cd build &&
         cmake .. &&
         make -j &&
-        cd /workspace &&
-        ./build/solution/answer
+        ./solution/answer
       "

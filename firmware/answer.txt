@@ -1,8 +1,60 @@
-Use this file to write your answer to Stage 2 of the firmware tasks.
+[Section 1: CAN]
 
-CAN
-Q1:
+1. Advantages and disadvantages of CAN vs USB, PCIe, SPI
 
-Q2:
+Advantages:
+- Robust and reliable: built-in error detection and retransmission.
+- Differential signaling: resistant to EMI, works over long cables.
+- Multi-master arbitration: multiple nodes share the bus without central coordination.
+- Deterministic timing: priority-based arbitration ensures critical messages get through.
 
-STM32 Chip Selection
+Disadvantages:
+- Low throughput: classic CAN limited to ~1 Mbps (CAN FD higher but still much lower than USB/PCIe).
+- Small payload: max 8 bytes (64 bytes for CAN FD).
+- Requires careful timing and configuration.
+- No built-in encryption or high-level protocol support.
+
+Comparison:
+- USB: much higher bandwidth, plug-and-play, but not deterministic and less robust in noisy environments.
+- PCIe: extremely high speed, but designed for internal buses, not distributed sensors.
+- SPI: simple and fast for point-to-point, but not scalable and no arbitration or long-cable robustness.
+
+2. Why Redback Racing chooses CAN
+
+- Embedded Systems, Powertrain, DAQ: CAN is robust against noise and vibration, ideal for sensors across a car chassis.
+- Autonomous Vehicles: deterministic message delivery is critical for safety-related commands (steering, braking).
+- Scalability: multiple sensors and ECUs can share the same bus.
+- Industry standard: widespread support and existing tools.
+
+---
+
+[Section 2: STM32 Chip Selection]
+
+Chosen MCU: **STM32F429** (example: STM32F429ZI)
+
+Justification:
+- Meets requirements:
+  - Ethernet MAC
+  - USB OTG FS/HS
+  - At least 3 ADCs
+  - 12 × 16-bit timers
+  - Flash size up to 2048 kB
+- CAN: typically 2 controllers on F4, which covers most use cases. If strict 3 CANs are required, STM32H743 (3× CAN FD) or STM32F413/F423 could be considered, though with higher cost/power.
+
+Exceeds or meets:
+- Flash: meets (2 MB available).
+- Timers and ADCs: meets or exceeds requirement.
+- Peripherals: meets Ethernet/USB; CAN requirement depends on variant chosen.
+
+Power requirements:
+- Operating voltage 1.8–3.6 V.
+- Active current typically ~100 mA depending on clock and peripherals.
+
+Physical dimensions:
+- Available in packages such as LQFP-144 (≈20 × 20 mm) and UFBGA-176.
+
+Cost:
+- Approx. USD $10–15, which is approximately AUD $16–24 in small volumes (prices vary depending on supplier and package).
+
+Optional notes:
+- If strictly 3 CAN are needed, recommend STM32H743 (3 CAN FD, 2 MB Flash, Ethernet, USB, ≥3 ADCs, many timers) but at higher power and cost.

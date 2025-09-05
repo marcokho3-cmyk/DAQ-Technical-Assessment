@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.22)
 
 project(firmware)
 
+include(CTest)
+enable_testing()
+
 add_subdirectory(solution)
 
 add_custom_target(clean-all

@@ -1,23 +1,18 @@
-
-FROM ubuntu:22.04 AS dev
+FROM ubuntu:22.04
 ARG DEBIAN_FRONTEND=noninteractive
 
-WORKDIR /app
+# System deps
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    build-essential cmake git pkg-config \
+    flex bison libfmt-dev libxml2-dev libboost-all-dev \
+    can-utils && \
+    update-ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update && \
-    apt-get install -y python3-pip \
-    wget autoconf libtool git make g++ valgrind \
-    cmake can-utils
+# Workdir where we’ll mount the repo
+WORKDIR /workspace
 
-COPY . .
-
-RUN find . -name "CMakeCache.txt" -delete
-
-RUN cd build/ && rm CMakeCache.txt || true
-
-RUN cd build/ && cmake ..
-
-RUN cd build/ && make -j    
-
-# ENTRYPOINT ["./build/solution/answer"]
-ENTRYPOINT ["bash"]
+# We do NOT copy the repo or build at image build time.
+# docker-compose will mount the repo and run the build command.
+CMD [ "bash" ]
