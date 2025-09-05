@@ -1,0 +1,49 @@
+# build dirs
+/build/
+/**/build/
+/**/CMakeFiles/
+/**/_deps/
+/**/Testing/
+
+# CMake junk
+CMakeCache.txt
+cmake_install.cmake
+CTestTestfile.cmake
+Makefile
+compile_commands.json
+
+# Binaries & objects
+*.o
+*.obj
+*.lo
+*.la
+*.a
+*.lib
+*.so
+*.so.*
+*.dylib
+*.dll
+*.exe
+*.out
+*.pdb
+*.ilk
+*.d
+*.mod
+*.cmd
+
+# Logs & temp
+*.log
+*.tmp
+
+# IDE/editor
+.vs/
+.vscode/
+.idea/
+
+# Outputs we don’t want in git
+output.txt
+output_stage4.txt
+stage4_run.log
+
+# Docker
+**/.dockerignore

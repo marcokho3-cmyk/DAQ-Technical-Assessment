@@ -1,0 +1,9 @@
+[submodule "firmware/extern/dbcppp"]
+	path = firmware/extern/dbcppp
+	url = https://github.com/xR3b0rn/dbcppp
+[submodule "firmware/extern/Catch2"]
+	path = firmware/extern/Catch2
+	url = https://github.com/catchorg/Catch2.git
+[submodule "firmware/external/dbcppp"]
+	path = firmware/external/dbcppp
+	url = https://github.com/xR3b0rn/dbcppp

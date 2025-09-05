@@ -1,0 +1,79 @@
+cmake_minimum_required(VERSION 3.22)
+project(solution LANGUAGES CXX)
+
+# ---- C++ standard ----
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# Default to Release if nothing set
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  add_definitions(-DDEBUG)
+endif()
+
+# ---- dbcppp: local submodule if present, else FetchContent ----
+include(FetchContent)
+
+set(DBCPPP_BUILD_TESTING OFF CACHE BOOL "Disable dbcppp tests" FORCE)
+
+set(DBCPPP_LOCAL_DIR "${CMAKE_SOURCE_DIR}/external/dbcppp")
+if(EXISTS "${DBCPPP_LOCAL_DIR}/CMakeLists.txt")
+  message(STATUS "Using local dbcppp at ${DBCPPP_LOCAL_DIR}")
+  add_subdirectory("${DBCPPP_LOCAL_DIR}" external_dbcppp)
+else()
+  message(STATUS "Fetching dbcppp via FetchContent")
+  FetchContent_Declare(
+    dbcppp
+    GIT_REPOSITORY https://github.com/xR3b0rn/dbcppp.git
+    # Pin to a known good commit to avoid surprises. Update if needed:
+    GIT_TAG 6d3d3a4b2db77a3c0a2c3e9d4f2b4a7c8d40ff0a
+    # If the above commit ever fails, you can switch to main by using:
+    # GIT_TAG main
+  )
+  FetchContent_MakeAvailable(dbcppp)
+endif()
+
+# ---- Sources ----
+if(EXISTS "${CMAKE_SOURCE_DIR}/solution/main.cpp")
+  set(SRC "${CMAKE_SOURCE_DIR}/solution/main.cpp")
+elseif(EXISTS "${CMAKE_SOURCE_DIR}/main.cpp")
+  set(SRC "${CMAKE_SOURCE_DIR}/main.cpp")
+else()
+  message(FATAL_ERROR "main.cpp not found (looked in solution/ and repo root)")
+endif()
+
+# ---- Target ----
+add_executable(answer "${SRC}")
+
+# Put the binary under build/solution/ so ENTRYPOINT ./build/solution/answer works
+set_target_properties(answer PROPERTIES
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/solution"
+)
+
+# Figure out which dbcppp target exists (subdir vs installed config)
+set(DBCPPP_TARGET "")
+if (TARGET dbcppp::dbcppp)
+  set(DBCPPP_TARGET dbcppp::dbcppp)
+elseif (TARGET dbcppp)
+  set(DBCPPP_TARGET dbcppp)
+elseif (TARGET dbcppp_shared)
+  set(DBCPPP_TARGET dbcppp_shared)
+elseif (TARGET dbcppp_static)
+  set(DBCPPP_TARGET dbcppp_static)
+else()
+  message(FATAL_ERROR "dbcppp target not found after add_subdirectory/FetchContent. Available targets: ${TARGETS}")
+endif()
+
+target_link_libraries(answer PRIVATE ${DBCPPP_TARGET})
+
+
+# Warnings
+if (MSVC)
+  target_compile_options(answer PRIVATE /W4)
+else()
+  target_compile_options(answer PRIVATE -Wall -Wextra -Wpedantic)
+endif()
